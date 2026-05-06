@@ -63,7 +63,8 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 /* 3D FIGURE */
 #fig-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);perspective:700px;width:400px;height:88vh;z-index:5;pointer-events:none}
 #fig3d{width:100%;height:100%;transform-style:preserve-3d;transition:transform 0.08s ease-out;will-change:transform;position:relative}
-#bust{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;filter:grayscale(100%) contrast(1.15) brightness(0.78);-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
+#bust{width:100%;height:100%;display:flex;align-items:center;justify-content:center;-webkit-mask-image:radial-gradient(ellipse 80% 90% at 50% 42%,black 45%,transparent 100%);mask-image:radial-gradient(ellipse 80% 90% at 50% 42%,black 45%,transparent 100%)}
+#bust svg{height:82%;width:auto}
 #spec{position:absolute;inset:0;pointer-events:none;transition:background 0.06s;-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
 #amb{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 30% 60%,rgba(140,10,10,0.1) 0%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
 
@@ -224,7 +225,131 @@ body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradi
 
     <div id="fig-wrap">
       <div id="fig3d">
-        <img id="bust" src="assets/bust.jpg" alt="">
+        <div id="bust">
+          <svg viewBox="0 0 240 340" xmlns="http://www.w3.org/2000/svg" overflow="visible">
+            <defs>
+              <filter id="eyeglow" x="-120%" y="-120%" width="340%" height="340%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="9" result="blur"/>
+                <feMerge><feMergeNode in="blur"/><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+              </filter>
+              <filter id="ambglow" x="-80%" y="-80%" width="260%" height="260%">
+                <feGaussianBlur in="SourceGraphic" stdDeviation="18"/>
+              </filter>
+              <radialGradient id="eyegrad" cx="50%" cy="50%" r="50%">
+                <stop offset="0%" stop-color="#ff1818" stop-opacity="1"/>
+                <stop offset="45%" stop-color="#b31212" stop-opacity="0.7"/>
+                <stop offset="100%" stop-color="#6a0a0a" stop-opacity="0"/>
+              </radialGradient>
+              <linearGradient id="skullgrad" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#170303"/>
+                <stop offset="100%" stop-color="#070101"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Ambient base glow -->
+            <ellipse cx="120" cy="190" rx="88" ry="105" fill="rgba(110,8,8,0.3)" filter="url(#ambglow)"/>
+
+            <!-- SKULL BODY -->
+            <path d="M120,30
+              C87,30 50,57 38,102
+              C26,147 35,180 52,202
+              L56,230
+              L84,250
+              L84,264
+              L90,270
+              L150,270
+              L156,264
+              L156,250
+              L184,230
+              L188,202
+              C205,180 214,147 202,102
+              C190,57 153,30 120,30Z"
+              fill="url(#skullgrad)" stroke="#2d0606" stroke-width="1.5"/>
+
+            <!-- Cranium top highlight -->
+            <path d="M84,52 C100,39 140,39 156,52 C172,66 176,90 169,108 C155,74 136,55 120,53 C104,55 85,74 71,108 C64,90 68,66 84,52Z"
+              fill="#1e0505" opacity="0.45"/>
+
+            <!-- Temporal arch left -->
+            <path d="M52,202 C42,196 35,212 39,228 C41,236 50,241 56,238" stroke="#1e0404" stroke-width="1" fill="none"/>
+            <!-- Temporal arch right -->
+            <path d="M188,202 C198,196 205,212 201,228 C199,236 190,241 184,238" stroke="#1e0404" stroke-width="1" fill="none"/>
+
+            <!-- EYE SOCKET BACKGROUND -->
+            <ellipse cx="88" cy="152" rx="36" ry="30" fill="#000"/>
+            <ellipse cx="152" cy="152" rx="36" ry="30" fill="#000"/>
+
+            <!-- EYE GLOW (behind) -->
+            <ellipse cx="88" cy="152" rx="28" ry="22" fill="url(#eyegrad)" filter="url(#eyeglow)" opacity="0.85">
+              <animate attributeName="opacity" values="0.85;0.35;0.85" dur="2.3s" repeatCount="indefinite"/>
+            </ellipse>
+            <ellipse cx="152" cy="152" rx="28" ry="22" fill="url(#eyegrad)" filter="url(#eyeglow)" opacity="0.85">
+              <animate attributeName="opacity" values="0.85;0.35;0.85" dur="2.3s" begin="0.4s" repeatCount="indefinite"/>
+            </ellipse>
+
+            <!-- Eye socket rim -->
+            <ellipse cx="88" cy="152" rx="36" ry="30" fill="none" stroke="#3d0909" stroke-width="1.5"/>
+            <ellipse cx="152" cy="152" rx="36" ry="30" fill="none" stroke="#3d0909" stroke-width="1.5"/>
+
+            <!-- Bright inner eye core -->
+            <ellipse cx="88" cy="152" rx="11" ry="9" fill="#dd1818" opacity="0.65">
+              <animate attributeName="opacity" values="0.65;0.2;0.65" dur="2.3s" repeatCount="indefinite"/>
+            </ellipse>
+            <ellipse cx="152" cy="152" rx="11" ry="9" fill="#dd1818" opacity="0.65">
+              <animate attributeName="opacity" values="0.65;0.2;0.65" dur="2.3s" begin="0.4s" repeatCount="indefinite"/>
+            </ellipse>
+
+            <!-- NASAL CAVITY -->
+            <path d="M111,202 L120,185 L129,202 L127,218 L113,218Z" fill="#000"/>
+            <path d="M111,202 L120,185 L129,202 L127,218 L113,218Z" fill="none" stroke="#1a0303" stroke-width="0.8"/>
+
+            <!-- Cheekbone structure -->
+            <path d="M55,175 L46,200" stroke="#200404" stroke-width="0.8" fill="none" opacity="0.5"/>
+            <path d="M185,175 L194,200" stroke="#200404" stroke-width="0.8" fill="none" opacity="0.5"/>
+
+            <!-- CRACKS -->
+            <path d="M120,48 L117,88 L123,118 L119,142" stroke="#2d0606" stroke-width="0.8" fill="none" opacity="0.7"/>
+            <path d="M117,88 L104,78 L96,70" stroke="#200505" stroke-width="0.5" fill="none" opacity="0.5"/>
+            <path d="M84,108 L73,96 L68,83" stroke="#1c0404" stroke-width="0.5" fill="none" opacity="0.4"/>
+            <path d="M156,108 L167,96 L172,83" stroke="#1c0404" stroke-width="0.5" fill="none" opacity="0.4"/>
+            <path d="M188,150 L198,138 L195,125" stroke="#180303" stroke-width="0.5" fill="none" opacity="0.35"/>
+
+            <!-- TEETH SEPARATOR BAR -->
+            <rect x="78" y="250" width="84" height="7" fill="#090101"/>
+
+            <!-- UPPER TEETH -->
+            <rect x="80" y="257" width="12" height="20" rx="2" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+            <rect x="94" y="257" width="14" height="22" rx="1" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+            <rect x="110" y="257" width="14" height="23" rx="1" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+            <rect x="126" y="257" width="14" height="23" rx="1" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+            <rect x="142" y="257" width="14" height="22" rx="1" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+            <rect x="158" y="257" width="12" height="20" rx="2" fill="#110303" stroke="#200404" stroke-width="0.7"/>
+
+            <!-- JAW / MANDIBLE -->
+            <path d="M84,264
+              L72,282
+              C68,300 75,323 92,329
+              L148,329
+              C165,323 172,300 168,282
+              L156,264Z"
+              fill="#080101" stroke="#1e0404" stroke-width="1.2"/>
+
+            <!-- Jaw structure line -->
+            <path d="M73,297 C87,312 153,312 167,297" stroke="#150303" stroke-width="0.7" fill="none"/>
+            <path d="M81,320 C97,326 143,326 159,320" stroke="#110202" stroke-width="0.6" fill="none"/>
+
+            <!-- LOWER TEETH -->
+            <rect x="83" y="265" width="11" height="18" rx="2" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+            <rect x="96" y="265" width="13" height="20" rx="1" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+            <rect x="111" y="265" width="13" height="21" rx="1" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+            <rect x="126" y="265" width="13" height="21" rx="1" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+            <rect x="141" y="265" width="13" height="20" rx="1" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+            <rect x="156" y="265" width="11" height="18" rx="2" fill="#0d0202" stroke="#1a0303" stroke-width="0.6"/>
+
+            <!-- Bottom ambient glow -->
+            <ellipse cx="120" cy="332" rx="58" ry="12" fill="rgba(150,10,10,0.35)" filter="url(#ambglow)"/>
+          </svg>
+        </div>
         <div id="spec"></div>
         <div id="amb"></div>
         <div id="reticle-layer">
@@ -638,9 +763,9 @@ function toggleTask(id,i,div){
 
 // GLITCH
 function triggerGlitch(){
-  const bust=document.getElementById('bust');
-  const a=document.createElement('img');a.src=bust.src;a.className='glitch-a';
-  const b=document.createElement('img');b.src=bust.src;b.className='glitch-b';
+  const bustEl=document.getElementById('bust');
+  const a=bustEl.cloneNode(true);a.removeAttribute('id');a.classList.add('glitch-a');a.style.position='absolute';a.style.inset='0';
+  const b=bustEl.cloneNode(true);b.removeAttribute('id');b.classList.add('glitch-b');b.style.position='absolute';b.style.inset='0';
   fig.appendChild(a);fig.appendChild(b);
   setTimeout(()=>{a.remove();b.remove()},160);
 }
