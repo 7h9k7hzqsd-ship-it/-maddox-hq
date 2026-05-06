@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MADDOX HQ</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --red:#b31212;--red2:#6a0a0a;--red3:rgba(179,18,18,0.12);
+  --bg:#020202;--p1:#060606;--p2:#0a0a0a;--p3:#0f0f0f;
+  --txt:#e0e0e0;--dim:#383838;--border:#0f0f0f;--w:#fff;
+}
+html,body{width:100%;height:100%;background:var(--bg);color:var(--txt);font-family:'Share Tech Mono',monospace;overflow:hidden}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 3px,rgba(0,0,0,0.08) 3px,rgba(0,0,0,0.08) 4px);pointer-events:none;z-index:9999}
+
+/* BOOT */
+#boot{position:fixed;inset:0;background:#000;z-index:5000;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.8s ease}
+#boot-logo{font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#fff;letter-spacing:8px;margin-bottom:40px;text-shadow:0 0 30px rgba(179,18,18,0.6)}
+#boot-logo em{color:var(--red);font-style:normal}
+#boot-terminal{width:380px;min-height:160px;font-size:12px;line-height:2;color:#555;letter-spacing:1px}
+#boot-terminal .line{display:block;color:#444}
+#boot-terminal .line.done{color:#666}
+#boot-terminal .line.active{color:#999}
+#boot-terminal .line.final{color:var(--red);font-weight:bold}
+#boot-bar{width:380px;height:1px;background:#111;margin-top:30px;position:relative;overflow:hidden}
+#boot-prog{height:100%;width:0%;background:var(--red);transition:width 0.1s;box-shadow:0 0 8px var(--red)}
+
+/* MISSION */
+#mission{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:4000;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity 0.4s}
+#mission.show{opacity:1;pointer-events:all}
+#mission-box{width:360px;background:var(--p1);border:1px solid var(--border);border-top:2px solid var(--red);padding:28px;position:relative}
+.m-title{font-family:'Orbitron',monospace;font-size:10px;color:var(--red);letter-spacing:4px;margin-bottom:20px}
+.m-date{font-size:9px;color:var(--dim);letter-spacing:2px;margin-bottom:18px}
+.m-task{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;background:var(--p2);border:1px solid var(--border);margin-bottom:6px}
+.m-task-dot{width:4px;height:4px;background:var(--red);flex-shrink:0;margin-top:5px}
+.m-task-txt{font-size:11px;line-height:1.5}
+.m-task-proj{font-size:8px;color:var(--dim);display:block;margin-top:3px;letter-spacing:1px}
+.m-dismiss{font-size:9px;color:#2a2a2a;letter-spacing:2px;text-align:center;margin-top:18px;cursor:pointer;transition:color 0.2s}
+.m-dismiss:hover{color:var(--dim)}
+
+/* APP */
+#app{width:100%;height:100%;opacity:0;transition:opacity 0.8s ease;position:relative}
+#particles-canvas{position:fixed;inset:0;pointer-events:none;z-index:1}
+
+/* HEADER */
+.hdr{display:flex;justify-content:space-between;align-items:center;padding:10px 26px;background:var(--p1);border-bottom:1px solid #0c0c0c;position:relative;z-index:200}
+.hdr::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(to right,transparent,var(--red),transparent)}
+.logo{font-family:'Orbitron',monospace;font-size:13px;font-weight:900;color:#fff;letter-spacing:5px}
+.logo em{color:var(--red);font-style:normal}
+.hdr-right{display:flex;gap:24px;align-items:center}
+.hdr-r{font-size:10px;color:var(--dim);letter-spacing:1px}
+.hdr-keys{font-size:9px;color:#1e1e1e;letter-spacing:1px}
+
+/* STAGE */
+#stage{position:relative;width:100%;height:calc(100vh - 44px);overflow:hidden;z-index:2}
+#light{position:absolute;inset:0;pointer-events:none;z-index:3}
+
+/* SVG */
+#svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:4}
+
+/* 3D FIGURE */
+#fig-wrap{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);perspective:700px;width:400px;height:88vh;z-index:5;pointer-events:none}
+#fig3d{width:100%;height:100%;transform-style:preserve-3d;transition:transform 0.08s ease-out;will-change:transform;position:relative}
+#bust{width:100%;height:100%;object-fit:cover;object-position:center 25%;display:block;filter:grayscale(100%) contrast(1.15) brightness(0.78);-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
+#spec{position:absolute;inset:0;pointer-events:none;transition:background 0.06s;-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
+#amb{position:absolute;inset:0;pointer-events:none;background:radial-gradient(ellipse at 30% 60%,rgba(140,10,10,0.1) 0%,transparent 70%);-webkit-mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%);mask-image:radial-gradient(ellipse 75% 88% at 50% 38%,black 50%,transparent 100%)}
+
+/* RETICLE */
+#reticle-layer{position:absolute;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity 0.2s}
+#reticle-layer.show{opacity:1}
+#reticle-svg{width:100%;height:100%}
+.rl{stroke:rgba(179,18,18,0.7);stroke-width:1;animation:rlPulse 1.5s ease-in-out infinite}
+.rl-c{fill:none;stroke:rgba(179,18,18,0.5);stroke-width:1;animation:rlPulse 1.5s ease-in-out infinite}
+.rl-c2{fill:rgba(179,18,18,0.15);stroke:rgba(179,18,18,0.8);stroke-width:1}
+.rl-label{fill:var(--red);font-family:'Share Tech Mono',monospace;font-size:9px;letter-spacing:2px}
+.rl-corner{stroke:var(--red);stroke-width:1.5;fill:none;opacity:0.8}
+@keyframes rlPulse{0%,100%{opacity:0.8}50%{opacity:0.3}}
+
+/* NODES */
+.node{position:absolute;z-index:6;cursor:pointer;display:flex;align-items:center;gap:11px;opacity:0.45;transition:opacity 0.25s}
+.node:hover,.node.active{opacity:1}
+.node.left{flex-direction:row-reverse}
+.node-inner{text-align:right}
+.node.left .node-inner{text-align:left}
+.node-label{font-family:'Orbitron',monospace;font-size:8px;font-weight:700;color:var(--dim);letter-spacing:2px;display:block;white-space:nowrap;transition:color 0.2s}
+.node-sub{font-size:8px;color:#1a1a1a;display:block;margin-top:2px;white-space:nowrap}
+.node:hover .node-label,.node.active .node-label{color:#fff}
+.streak-badge{display:none;font-size:8px;color:var(--red);letter-spacing:1px;margin-top:3px;white-space:nowrap}
+.node.active .streak-badge,.node:hover .streak-badge{display:block}
+
+/* DOT + RING */
+.dot-wrap{position:relative;width:30px;height:30px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ring-svg{position:absolute;top:0;left:0;width:100%;height:100%;transform:rotate(-90deg);pointer-events:none}
+.ring-bg{fill:none;stroke:rgba(100,10,10,0.2);stroke-width:2}
+.ring-fill{fill:none;stroke:var(--red);stroke-width:2;stroke-linecap:round;stroke-dasharray:75.4;stroke-dashoffset:75.4;transition:stroke-dashoffset 1s ease}
+.dot{width:9px;height:9px;border-radius:50%;background:#1a1a1a;border:1px solid var(--red2);flex-shrink:0;transition:all 0.25s;animation:pdot 3s infinite;position:relative;z-index:1}
+.node.active .dot{background:var(--red);box-shadow:0 0 10px var(--red),0 0 22px rgba(179,18,18,0.4);border-color:var(--red)}
+@keyframes pdot{0%,100%{box-shadow:0 0 0 0 rgba(179,18,18,0.5)}50%{box-shadow:0 0 0 5px rgba(179,18,18,0)}}
+
+/* PANEL */
+#panel{position:absolute;top:0;right:0;width:400px;height:100%;background:var(--p1);border-left:1px solid var(--border);z-index:50;display:flex;flex-direction:column;transform:translateX(100%);transition:transform 0.38s cubic-bezier(0.16,1,0.3,1);overflow:hidden}
+#panel.open{transform:translateX(0)}
+.p-banner{height:170px;position:relative;overflow:hidden;flex-shrink:0;background:#050505}
+.p-banner img{width:100%;height:100%;object-fit:cover;filter:grayscale(60%) brightness(0.38) contrast(1.25);transition:transform 6s ease}
+#panel.open .p-banner img{transform:scale(1.06)}
+.p-over{position:absolute;inset:0;background:linear-gradient(to bottom,transparent 0%,rgba(6,6,6,0.98) 100%);display:flex;flex-direction:column;justify-content:flex-end;padding:16px 20px}
+.p-code{font-size:7px;color:var(--red);letter-spacing:4px;margin-bottom:5px}
+.p-title{font-family:'Orbitron',monospace;font-size:17px;font-weight:900;color:#fff;letter-spacing:2px;line-height:1}
+.p-bar{width:28px;height:2px;background:var(--red);margin-top:9px}
+.p-close{position:absolute;top:11px;right:13px;font-size:9px;color:var(--dim);cursor:pointer;padding:4px 8px;border:1px solid var(--border);transition:all 0.15s}
+.p-close:hover{color:#fff;border-color:#222}
+.p-body{flex:1;overflow-y:auto;padding:18px 20px}
+.p-desc{font-size:11px;color:#333;line-height:1.8;border-left:1px solid var(--red2);padding-left:14px;margin-bottom:22px}
+.p-sec{font-size:7px;color:#2a2a2a;letter-spacing:3px;margin-bottom:12px;display:flex;align-items:center;gap:10px}
+.p-sec::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* TASK CARDS */
+.tcard{display:flex;align-items:center;background:var(--p2);border:1px solid var(--border);margin-bottom:6px;cursor:pointer;transition:border-color 0.15s;position:relative;overflow:hidden}
+.tcard::before{content:'';position:absolute;left:0;top:0;width:2px;height:100%;background:var(--red);transform:scaleY(0);transition:transform 0.15s}
+.tcard:hover::before{transform:scaleY(1)}
+.tcard:hover{border-color:#1c1c1c}
+.tcard.done{opacity:0.28}
+.tcard.done .tc-text{text-decoration:line-through}
+.tc-img{width:56px;height:56px;flex-shrink:0;object-fit:cover;filter:grayscale(80%) brightness(0.45) contrast(1.2)}
+.tc-body{flex:1;padding:9px 12px}
+.tc-text{font-size:11px;line-height:1.4;display:block;margin-bottom:4px}
+.tc-foot{display:flex;align-items:center;justify-content:space-between}
+.tc-chk{width:12px;height:12px;border:1px solid #1e1e1e;display:flex;align-items:center;justify-content:font-size:9px;color:var(--red)}
+.tc-tag{font-size:7px;padding:1px 5px;border:1px solid;letter-spacing:1px}
+.tc-tag.h{color:var(--red);border-color:var(--red2)}
+.tc-tag.m{color:#2d2d2d;border-color:#181818}
+.tc-tag.l{color:#1a1a1a;border-color:#0e0e0e}
+
+/* GLITCH */
+@keyframes glitch{
+  0%{clip-path:inset(40% 0 61% 0);transform:translate(-4px,0)}
+  20%{clip-path:inset(92% 0 1% 0);transform:translate(3px,0)}
+  40%{clip-path:inset(43% 0 1% 0);transform:translate(-3px,0)}
+  60%{clip-path:inset(25% 0 58% 0);transform:translate(4px,0)}
+  80%{clip-path:inset(54% 0 7% 0);transform:translate(-4px,0)}
+  100%{clip-path:inset(58% 0 43% 0);transform:translate(0,0)}
+}
+.glitch-a{position:absolute;inset:0;animation:glitch 0.15s linear;opacity:0.6;filter:hue-rotate(180deg)}
+.glitch-b{position:absolute;inset:0;animation:glitch 0.15s linear reverse;opacity:0.5}
+
+/* NOTES */
+#nbtn{position:absolute;bottom:22px;left:22px;z-index:7;font-family:'Orbitron',monospace;font-size:8px;letter-spacing:2px;color:var(--dim);border:1px solid var(--border);padding:8px 14px;cursor:pointer;background:var(--p1);transition:all 0.2s}
+#nbtn:hover{color:#fff;border-color:#222}
+#nbtn span{font-size:8px;color:#1e1e1e;margin-left:6px}
+#npanel{position:absolute;bottom:0;left:0;right:0;height:240px;background:var(--p1);border-top:1px solid var(--border);z-index:9;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.16,1,0.3,1);display:flex;flex-direction:column}
+#npanel.open{transform:translateY(0)}
+.n-hdr{padding:9px 20px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.n-ttl{font-family:'Orbitron',monospace;font-size:8px;color:var(--red);letter-spacing:3px}
+.n-cls{font-size:9px;color:var(--dim);cursor:pointer}
+.n-cls:hover{color:#fff}
+#nta{flex:1;background:transparent;border:none;outline:none;color:#555;font-family:'Share Tech Mono',monospace;font-size:12px;padding:14px 20px;resize:none;line-height:1.8}
+#nta::placeholder{color:#161616}
+
+/* TASKBAR */
+#tbar{position:absolute;bottom:22px;right:22px;z-index:7;width:250px;background:var(--p1);border:1px solid var(--border);border-top:2px solid var(--red)}
+.tb-h{padding:9px 13px;display:flex;justify-content:space-between;cursor:move;user-select:none}
+.tb-ttl{font-family:'Orbitron',monospace;font-size:8px;color:#fff;letter-spacing:3px}
+.tb-tog{font-size:10px;color:var(--dim);cursor:pointer}
+.tb-b{padding:8px;max-height:200px;overflow-y:auto}
+.tb-g{margin-bottom:9px}
+.tb-gl{font-size:7px;color:var(--red);letter-spacing:2px;margin-bottom:5px}
+.tb-t{display:flex;align-items:center;gap:7px;padding:6px 9px;background:var(--p2);border:1px solid var(--border);margin-bottom:3px;font-size:9px}
+.tb-d{width:3px;height:3px;background:var(--red);flex-shrink:0}
+
+/* SHORTCUTS HINT */
+#shortcuts{position:absolute;top:14px;left:50%;transform:translateX(-50%);z-index:7;display:flex;gap:8px;opacity:0;transition:opacity 0.5s;pointer-events:none}
+#shortcuts.show{opacity:1}
+.sk{font-size:8px;color:#1e1e1e;letter-spacing:1px;border:1px solid #111;padding:3px 7px}
+
+::-webkit-scrollbar{width:2px}
+::-webkit-scrollbar-thumb{background:#151515}
+
+/* LINE PULSE */
+@keyframes linePulse{0%,100%{stroke-opacity:0.55}50%{stroke-opacity:0.12}}
+@keyframes linePulseActive{0%,100%{stroke-opacity:0.85}50%{stroke-opacity:0.4}}
+.ln{stroke-dasharray:600;stroke-dashoffset:600;transition:stroke-dashoffset 0.9s ease,stroke 0.3s}
+.ln.drawn{stroke-dashoffset:0;animation:linePulse 3s ease-in-out infinite}
+.ln.active{stroke:rgba(179,18,18,0.75)!important;stroke-width:1.5px!important;animation:linePulseActive 1.5s ease-in-out infinite}
+</style>
+</head>
+<body>
+
+<!-- BOOT -->
+<div id="boot">
+  <div>
+    <div id="boot-logo">MADDOX<em> //</em> HQ</div>
+    <div id="boot-terminal"></div>
+    <div id="boot-bar"><div id="boot-prog"></div></div>
+  </div>
+</div>
+
+<!-- MISSION -->
+<div id="mission">
+  <div id="mission-box">
+    <div class="m-title">[ DAILY MISSION ]</div>
+    <div class="m-date" id="m-date"></div>
+    <div id="mission-tasks"></div>
+    <div class="m-dismiss" onclick="closeMission()">[ PRESS ANY KEY OR CLICK TO CONTINUE ]</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="hdr">
+    <div class="logo">MADDOX<em> //</em> HQ</div>
+    <div class="hdr-right">
+      <div class="hdr-keys">1-5 NODES &nbsp;·&nbsp; N NOTES &nbsp;·&nbsp; ESC CLOSE</div>
+      <div class="hdr-r" id="clk">--:--:--</div>
+    </div>
+  </div>
+
+  <div id="stage">
+    <div id="light"></div>
+    <svg id="svg"></svg>
+
+    <div id="fig-wrap">
+      <div id="fig3d">
+        <img id="bust" src="assets/bust.jpg" alt="">
+        <div id="spec"></div>
+        <div id="amb"></div>
+        <div id="reticle-layer">
+          <svg id="reticle-svg">
+            <line id="rl-h1" class="rl"/><line id="rl-h2" class="rl"/>
+            <line id="rl-v1" class="rl"/><line id="rl-v2" class="rl"/>
+            <circle id="rl-co" class="rl-c"/>
+            <circle id="rl-ci" class="rl-c2" r="3"/>
+            <text id="rl-lbl" class="rl-label"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- NODES -->
+    <div class="node" id="n-brain" data-id="brain" data-key="1" style="top:10%;right:11%">
+      <div class="dot-wrap">
+        <svg class="ring-svg" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12"/><circle class="ring-fill" id="ring-brain" cx="15" cy="15" r="12"/></svg>
+        <div class="dot" id="d-brain"></div>
+      </div>
+      <div class="node-inner">
+        <span class="node-label">BRAIN 1</span>
+        <span class="node-sub">SECOND MIND</span>
+        <span class="streak-badge" id="sb-brain"></span>
+      </div>
+    </div>
+
+    <div class="node" id="n-school" data-id="school" data-key="2" style="top:32%;right:9%">
+      <div class="dot-wrap">
+        <svg class="ring-svg" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12"/><circle class="ring-fill" id="ring-school" cx="15" cy="15" r="12"/></svg>
+        <div class="dot" id="d-school"></div>
+      </div>
+      <div class="node-inner">
+        <span class="node-label">SCHOOL</span>
+        <span class="node-sub">BUSINESS MGMT</span>
+        <span class="streak-badge" id="sb-school"></span>
+      </div>
+    </div>
+
+    <div class="node left" id="n-si" data-id="si" data-key="3" style="top:48%;left:9%">
+      <div class="dot-wrap">
+        <svg class="ring-svg" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12"/><circle class="ring-fill" id="ring-si" cx="15" cy="15" r="12"/></svg>
+        <div class="dot" id="d-si"></div>
+      </div>
+      <div class="node-inner">
+        <span class="node-label">SELF IMPROVEMENT</span>
+        <span class="node-sub">POSTURE · STACK</span>
+        <span class="streak-badge" id="sb-si"></span>
+      </div>
+    </div>
+
+    <div class="node left" id="n-mew" data-id="mew" data-key="4" style="top:65%;left:8%">
+      <div class="dot-wrap">
+        <svg class="ring-svg" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12"/><circle class="ring-fill" id="ring-mew" cx="15" cy="15" r="12"/></svg>
+        <div class="dot" id="d-mew"></div>
+      </div>
+      <div class="node-inner">
+        <span class="node-label">MEWING</span>
+        <span class="node-sub">MAXILLA · AIRWAY</span>
+        <span class="streak-badge" id="sb-mew"></span>
+      </div>
+    </div>
+
+    <div class="node" id="n-phys" data-id="phys" data-key="5" style="top:74%;right:10%">
+      <div class="dot-wrap">
+        <svg class="ring-svg" viewBox="0 0 30 30"><circle class="ring-bg" cx="15" cy="15" r="12"/><circle class="ring-fill" id="ring-phys" cx="15" cy="15" r="12"/></svg>
+        <div class="dot" id="d-phys"></div>
+      </div>
+      <div class="node-inner">
+        <span class="node-label">PHYSIQUE</span>
+        <span class="node-sub">PEPTIDES · BUILD</span>
+        <span class="streak-badge" id="sb-phys"></span>
+      </div>
+    </div>
+
+    <!-- PANEL -->
+    <div id="panel">
+      <div class="p-banner">
+        <img id="p-img" src="" alt="">
+        <div class="p-over">
+          <div class="p-code" id="p-code"></div>
+          <div class="p-title" id="p-ttl"></div>
+          <div class="p-bar"></div>
+        </div>
+        <div class="p-close" onclick="closePanel()">[ CLOSE ]</div>
+      </div>
+      <div class="p-body">
+        <div class="p-desc" id="p-desc"></div>
+        <div class="p-sec">OBJECTIVES</div>
+        <div id="p-tasks"></div>
+      </div>
+    </div>
+
+    <!-- NOTES -->
+    <div id="nbtn" onclick="toggleN()">[ FIELD NOTES ] <span>N</span></div>
+    <div id="npanel">
+      <div class="n-hdr">
+        <span class="n-ttl">FIELD NOTES</span>
+        <span class="n-cls" onclick="toggleN()">[ CLOSE ]</span>
+      </div>
+      <textarea id="nta" placeholder="thoughts, observations, anything..."></textarea>
+    </div>
+
+    <!-- TASKBAR -->
+    <div id="tbar">
+      <div class="tb-h" id="tbdrag"><span class="tb-ttl">ACTIVE TASKS</span><span class="tb-tog" onclick="toggleTB()">▼</span></div>
+      <div class="tb-b" id="tbb">
+        <div class="tb-g">
+          <div class="tb-gl">SELF IMPROVEMENT</div>
+          <div class="tb-t"><div class="tb-d"></div>Rib flare stretches — daily</div>
+          <div class="tb-t"><div class="tb-d"></div>Mewing throughout the day</div>
+          <div class="tb-t"><div class="tb-d"></div>Peptide protocol on schedule</div>
+        </div>
+        <div class="tb-g">
+          <div class="tb-gl">MEWING</div>
+          <div class="tb-t"><div class="tb-d"></div>Nasal breathing all workouts</div>
+        </div>
+        <div class="tb-g">
+          <div class="tb-gl">BRAIN 1</div>
+          <div class="tb-t"><div class="tb-d"></div>Launch dashboard on GitHub</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// DATA
+const A='assets/';
+const P={
+  brain:{
+    code:'OPERATION: OMNISCIENT',title:'BRAIN 1',
+    img:A+'img1.jpeg',
+    desc:'Second brain infrastructure. Obsidian vault connected to Claude Code via MCP. Every conversation tracked, summarized, and saved automatically.',
+    rot:[6,-4],
+    tasks:[
+      {txt:'Fix Windows voice typing',tag:'l',img:A+'img2.jpeg'},
+      {txt:'Keep adding info to vault each session',tag:'m',img:A+'img3.jpeg'},
+      {txt:'Launch dashboard live on GitHub Pages',tag:'h',img:A+'img1.jpeg'}
+    ]
+  },
+  school:{
+    code:'OPERATION: DEGREE',title:'SCHOOL',
+    img:A+'img4.jpeg',
+    desc:'Business Management. Excel, PowerBI, data analysis. Claude assigns tasks as deadlines come up.',
+    rot:[4,-2],
+    tasks:[
+      {txt:'No active tasks — Claude assigns as they come',tag:'l',img:A+'img4.jpeg'}
+    ]
+  },
+  si:{
+    code:'OPERATION: EVOLVE',title:'SELF IMPROVEMENT',
+    img:A+'img8.jpeg',
+    desc:'Rib flare correction. Shoulder mobility. Peptide protocol — CJC-1295, ipamorelin, GHK-Cu. PP405 Phase II. Structural optimization.',
+    rot:[-6,-2],
+    tasks:[
+      {txt:'Rib flare corrective stretches — daily, no skipping',tag:'h',img:A+'img5.jpeg'},
+      {txt:'Shoulder mobility — fix trap overcompensation',tag:'h',img:A+'img9.jpeg'},
+      {txt:'Track PP405 results weekly',tag:'m',img:A+'img6.jpeg'},
+      {txt:'Peptide protocol — CJC-1295 + Ipamorelin on schedule',tag:'h',img:A+'img1.jpeg'}
+    ]
+  },
+  mew:{
+    code:'OPERATION: MAXILLA',title:'MEWING',
+    img:A+'img6.jpeg',
+    desc:'Full tongue flat against palate. Airway optimization through nasal breathing. Structural changes to maxilla over time.',
+    rot:[-5,3],
+    tasks:[
+      {txt:'Mewing — full tongue on palate all day',tag:'h',img:A+'img8.jpeg'},
+      {txt:'Nasal breathing — all workouts, zero mouth breathing',tag:'h',img:A+'img9.jpeg'},
+      {txt:'Log weekly: comfort level + duration held',tag:'m',img:A+'img10.jpeg'},
+      {txt:'5 min @ 7mph — zero mouth breathing — DONE',tag:'l',done:true,img:A+'img5.jpeg'}
+    ]
+  },
+  phys:{
+    code:'OPERATION: BUILT',title:'PHYSIQUE',
+    img:A+'img7.jpeg',
+    desc:'Body composition and performance. Hair loss stack: finasteride, minoxidil, PP405. Peptides active. Cut experience on deck.',
+    rot:[5,3],
+    tasks:[
+      {txt:'Log every single workout — no exceptions',tag:'h',img:A+'img4.jpeg'},
+      {txt:'Research optimal peptide timing and dosing',tag:'m',img:A+'img7.jpeg'},
+      {txt:'Track hair progress — fin + minox + PP405',tag:'m',img:A+'img6.jpeg'}
+    ]
+  }
+};
+const nodeOrder=['brain','school','si','mew','phys'];
+const anchors={brain:[52,7],school:[54,30],si:[40,56],mew:[44,70],phys:[52,82]};
+const streakDefs={mew:5,si:3,phys:2,brain:1,school:0};
+
+// BOOT
+const bootLines=[
+  {t:'INITIALIZING MADDOX HQ v1.0...',d:350},
+  {t:'LOADING NEURAL PROFILE...',d:300},
+  {t:'SYNCING OPERATIONS DATABASE...',d:400},
+  {t:'ESTABLISHING SECURE CONNECTION...',d:300},
+  {t:'CALIBRATING INTERFACE...',d:350},
+  {t:'> ACCESS GRANTED',d:200,cls:'final'}
+];
+
+async function sleep(ms){return new Promise(r=>setTimeout(r,ms))}
+
+async function runBoot(){
+  const term=document.getElementById('boot-terminal');
+  const prog=document.getElementById('boot-prog');
+  for(let i=0;i<bootLines.length;i++){
+    const{t,d,cls}=bootLines[i];
+    const span=document.createElement('span');
+    span.className='line active'+(cls?' '+cls:'');
+    span.textContent='> '+t;
+    term.appendChild(span);
+    prog.style.width=((i+1)/bootLines.length*100)+'%';
+    await sleep(d);
+    span.classList.remove('active');
+    span.classList.add('done');
+  }
+  await sleep(500);
+  const boot=document.getElementById('boot');
+  boot.style.opacity='0';
+  await sleep(800);
+  boot.style.display='none';
+  document.getElementById('app').style.opacity='1';
+  setTimeout(()=>{
+    drawLines();
+    updateRings();
+    updateStreaks();
+    setTimeout(showMission,600);
+  },300);
+}
+
+// PARTICLES
+function initParticles(){
+  const c=document.getElementById('particles-canvas');
+  const ctx=c.getContext('2d');
+  function resize(){c.width=window.innerWidth;c.height=window.innerHeight}
+  resize();
+  window.addEventListener('resize',resize);
+  const pts=Array.from({length:35},()=>({
+    x:Math.random()*c.width,y:Math.random()*c.height,
+    sz:Math.random()*1.2+0.3,
+    vy:-(Math.random()*0.25+0.08),
+    vx:(Math.random()-0.5)*0.15,
+    op:Math.random()*0.12+0.02
+  }));
+  (function draw(){
+    ctx.clearRect(0,0,c.width,c.height);
+    pts.forEach(p=>{
+      ctx.beginPath();ctx.arc(p.x,p.y,p.sz,0,Math.PI*2);
+      ctx.fillStyle=`rgba(160,15,15,${p.op})`;ctx.fill();
+      p.y+=p.vy;p.x+=p.vx;
+      if(p.y<0){p.y=c.height;p.x=Math.random()*c.width}
+    });
+    requestAnimationFrame(draw);
+  })();
+}
+
+// CLOCK
+function tick(){
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  document.getElementById('clk').textContent=`${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())} | ${p(n.getHours())}:${p(n.getMinutes())}:${p(n.getSeconds())}`;
+}
+tick();setInterval(tick,1000);
+
+// SVG LINES
+const svg=document.getElementById('svg');
+const lines={};
+function drawLines(){
+  svg.innerHTML='';
+  const fw=document.getElementById('fig-wrap');
+  const fr=fw.getBoundingClientRect();
+  const sr=document.getElementById('stage').getBoundingClientRect();
+  Object.keys(anchors).forEach(id=>{
+    const[ax,ay]=anchors[id];
+    const fx=fr.left-sr.left+ax/100*fr.width;
+    const fy=fr.top-sr.top+ay/100*fr.height;
+    const dot=document.getElementById('d-'+id);
+    const dr=dot.getBoundingClientRect();
+    const dx=dr.left-sr.left+dr.width/2;
+    const dy=dr.top-sr.top+dr.height/2;
+    const cx=(fx+dx)/2,cy=Math.min(fy,dy)-15;
+    const path=document.createElementNS('http://www.w3.org/2000/svg','path');
+    path.setAttribute('d',`M${fx},${fy} Q${cx},${cy} ${dx},${dy}`);
+    path.setAttribute('stroke','rgba(55,8,8,0.7)');
+    path.setAttribute('stroke-width','1');
+    path.setAttribute('fill','none');
+    path.setAttribute('class','ln');
+    svg.appendChild(path);
+    lines[id]=path;
+    const circ=document.createElementNS('http://www.w3.org/2000/svg','circle');
+    circ.setAttribute('cx',fx);circ.setAttribute('cy',fy);circ.setAttribute('r','3.5');
+    circ.setAttribute('fill','rgba(100,12,12,0.8)');
+    circ.setAttribute('stroke','rgba(179,18,18,0.3)');
+    circ.setAttribute('stroke-width','1');
+    svg.appendChild(circ);
+    setTimeout(()=>path.classList.add('drawn'),150+nodeOrder.indexOf(id)*130);
+  });
+}
+window.addEventListener('resize',()=>{if(document.getElementById('app').style.opacity==='1')drawLines()});
+
+// 3D ROTATION
+const fig=document.getElementById('fig3d');
+const spec=document.getElementById('spec');
+let tx=0,ty=0,cx2=0,cy2=0;
+
+document.addEventListener('mousemove',e=>{
+  const cx=window.innerWidth/2,cy=window.innerHeight/2;
+  tx=(e.clientX-cx)/cx*8;
+  ty=-(e.clientY-cy)/cy*5;
+  const lx=(e.clientX-cx)/cx,ly=(e.clientY-cy)/cy;
+  spec.style.background=`radial-gradient(ellipse at ${50+lx*30}% ${50+ly*30}%,rgba(255,255,255,0.04) 0%,transparent 65%)`;
+  document.getElementById('light').style.background=`radial-gradient(ellipse at ${e.clientX}px ${e.clientY}px,rgba(140,10,10,0.04) 0%,transparent 50%)`;
+});
+
+(function raf(){
+  cx2+=(tx-cx2)*0.09;
+  cy2+=(ty-cy2)*0.09;
+  fig.style.transform=`rotateY(${cx2}deg) rotateX(${cy2}deg)`;
+  requestAnimationFrame(raf);
+})();
+
+// HOVER RETICLE
+const figWrap=document.getElementById('fig-wrap');
+const rLayer=document.getElementById('reticle-layer');
+let activeNode=null;
+
+figWrap.style.pointerEvents='none';
+document.querySelectorAll('.node').forEach(node=>{
+  node.addEventListener('mouseenter',()=>{
+    const id=node.dataset.id;
+    const[ax,ay]=anchors[id];
+    const fw=document.getElementById('fig-wrap');
+    const fr=fw.getBoundingClientRect();
+    const sr=document.getElementById('stage').getBoundingClientRect();
+    const px=fr.left-sr.left+ax/100*fr.width;
+    const py=fr.top-sr.top+ay/100*fr.height;
+    const sw=sr.width,sh=sr.height;
+    const g=20;
+    document.getElementById('rl-h1').setAttribute('x1',px-g);document.getElementById('rl-h1').setAttribute('y1',py);document.getElementById('rl-h1').setAttribute('x2',0);document.getElementById('rl-h1').setAttribute('y2',py);
+    document.getElementById('rl-h2').setAttribute('x1',px+g);document.getElementById('rl-h2').setAttribute('y1',py);document.getElementById('rl-h2').setAttribute('x2',sw);document.getElementById('rl-h2').setAttribute('y2',py);
+    document.getElementById('rl-v1').setAttribute('x1',px);document.getElementById('rl-v1').setAttribute('y1',py-g);document.getElementById('rl-v1').setAttribute('x2',px);document.getElementById('rl-v1').setAttribute('y2',0);
+    document.getElementById('rl-v2').setAttribute('x1',px);document.getElementById('rl-v2').setAttribute('y1',py+g);document.getElementById('rl-v2').setAttribute('x2',px);document.getElementById('rl-v2').setAttribute('y2',sh);
+    document.getElementById('rl-co').setAttribute('cx',px);document.getElementById('rl-co').setAttribute('cy',py);document.getElementById('rl-co').setAttribute('r','14');
+    document.getElementById('rl-ci').setAttribute('cx',px);document.getElementById('rl-ci').setAttribute('cy',py);
+    document.getElementById('rl-lbl').setAttribute('x',px+18);document.getElementById('rl-lbl').setAttribute('y',py-10);
+    document.getElementById('rl-lbl').textContent=P[id].code;
+    rLayer.classList.add('show');
+  });
+  node.addEventListener('mouseleave',()=>rLayer.classList.remove('show'));
+});
+
+// PROGRESS RINGS
+function updateRings(){
+  Object.keys(P).forEach(id=>{
+    const tasks=P[id].tasks;
+    const done=tasks.filter(t=>t.done).length;
+    const pct=tasks.length?done/tasks.length:0;
+    const offset=75.4*(1-pct);
+    const ring=document.getElementById('ring-'+id);
+    if(ring)setTimeout(()=>ring.style.strokeDashoffset=offset,200);
+  });
+}
+
+// STREAKS
+function updateStreaks(){
+  Object.keys(streakDefs).forEach(id=>{
+    const days=streakDefs[id];
+    const el=document.getElementById('sb-'+id);
+    if(el&&days>0)el.textContent='DAY '+days+' STREAK';
+  });
+}
+
+// PANEL
+let currentNode=null;
+function openPanel(id){
+  const d=P[id];
+  document.getElementById('p-img').src=d.img;
+  document.getElementById('p-code').textContent=d.code;
+  document.getElementById('p-ttl').textContent=d.title;
+  document.getElementById('p-desc').textContent=d.desc;
+  const tc=document.getElementById('p-tasks');
+  tc.innerHTML='';
+  d.tasks.forEach((t,i)=>{
+    const div=document.createElement('div');
+    div.className='tcard'+(t.done?' done':'');
+    const imgSrc=t.img||d.img;
+    div.innerHTML=`<img class="tc-img" src="${imgSrc}" alt=""><div class="tc-body"><span class="tc-text">${t.txt}</span><div class="tc-foot"><span class="tc-tag ${t.tag}">${t.tag==='h'?'HIGH':t.tag==='m'?'MED':'LOW'}</span><div class="tc-chk">${t.done?'✓':''}</div></div></div>`;
+    div.onclick=()=>toggleTask(id,i,div);
+    tc.appendChild(div);
+  });
+  document.getElementById('panel').classList.add('open');
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('active'));
+  document.getElementById('n-'+id).classList.add('active');
+  if(lines[id])Object.keys(lines).forEach(k=>lines[k].classList[k===id?'add':'remove']('active'));
+  currentNode=id;
+  triggerGlitch();
+}
+
+function closePanel(){
+  document.getElementById('panel').classList.remove('open');
+  document.querySelectorAll('.node').forEach(n=>n.classList.remove('active'));
+  Object.keys(lines).forEach(k=>lines[k].classList.remove('active'));
+  currentNode=null;
+}
+
+function toggleTask(id,i,div){
+  P[id].tasks[i].done=!P[id].tasks[i].done;
+  div.classList.toggle('done');
+  div.querySelector('.tc-chk').textContent=P[id].tasks[i].done?'✓':'';
+  updateRings();
+}
+
+// GLITCH
+function triggerGlitch(){
+  const bust=document.getElementById('bust');
+  const a=document.createElement('img');a.src=bust.src;a.className='glitch-a';
+  const b=document.createElement('img');b.src=bust.src;b.className='glitch-b';
+  fig.appendChild(a);fig.appendChild(b);
+  setTimeout(()=>{a.remove();b.remove()},160);
+}
+
+// DAILY MISSION
+function showMission(){
+  const all=[];
+  Object.keys(P).forEach(id=>P[id].tasks.filter(t=>t.tag==='h'&&!t.done).forEach(t=>all.push({txt:t.txt,proj:P[id].title})));
+  const top=all.slice(0,3);
+  if(!top.length)return;
+  const n=new Date(),p=x=>String(x).padStart(2,'0');
+  document.getElementById('m-date').textContent=`${n.getFullYear()}-${p(n.getMonth()+1)}-${p(n.getDate())}`;
+  const mc=document.getElementById('mission-tasks');
+  top.forEach(t=>{
+    const div=document.createElement('div');div.className='m-task';
+    div.innerHTML=`<div class="m-task-dot"></div><div class="m-task-txt">${t.txt}<span class="m-task-proj">${t.proj}</span></div>`;
+    mc.appendChild(div);
+  });
+  document.getElementById('mission').classList.add('show');
+}
+function closeMission(){document.getElementById('mission').classList.remove('show')}
+
+// NOTES
+const nta=document.getElementById('nta');
+nta.value=localStorage.getItem('mhq-notes')||'';
+nta.addEventListener('input',()=>localStorage.setItem('mhq-notes',nta.value));
+function toggleN(){document.getElementById('npanel').classList.toggle('open')}
+
+// TASKBAR DRAG + TOGGLE
+let tbOpen=true;
+function toggleTB(){
+  tbOpen=!tbOpen;
+  document.getElementById('tbb').style.display=tbOpen?'':'none';
+  document.querySelector('.tb-tog').textContent=tbOpen?'▼':'▲';
+}
+(function initDrag(){
+  const el=document.getElementById('tbar');
+  const hdr=document.getElementById('tbdrag');
+  let dx=0,dy=0,x=0,y=0;
+  hdr.addEventListener('mousedown',e=>{
+    e.preventDefault();
+    x=e.clientX;y=e.clientY;
+    document.addEventListener('mousemove',drag);
+    document.addEventListener('mouseup',()=>document.removeEventListener('mousemove',drag),{once:true});
+  });
+  function drag(e){
+    dx=e.clientX-x;dy=e.clientY-y;x=e.clientX;y=e.clientY;
+    const r=el.getBoundingClientRect();
+    el.style.right='auto';el.style.bottom='auto';
+    el.style.left=(r.left+dx)+'px';el.style.top=(r.top+dy)+'px';
+  }
+})();
+
+// SHORTCUTS
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){closePanel();document.getElementById('npanel').classList.remove('open');document.getElementById('mission').classList.remove('show')}
+  if(e.key==='n'||e.key==='N'){if(document.getElementById('mission').classList.contains('show'))return;toggleN()}
+  if(['1','2','3','4','5'].includes(e.key)){
+    const id=nodeOrder[parseInt(e.key)-1];
+    if(currentNode===id)closePanel();else openPanel(id);
+  }
+  if(document.getElementById('mission').classList.contains('show'))closeMission();
+});
+
+document.querySelectorAll('.node').forEach(node=>{
+  node.addEventListener('click',()=>{
+    const id=node.dataset.id;
+    if(currentNode===id)closePanel();else openPanel(id);
+  });
+});
+
+// SHORTCUTS HINT
+setTimeout(()=>{
+  const s=document.getElementById('shortcuts');
+  if(s){s.classList.add('show');setTimeout(()=>s.classList.remove('show'),4000)}
+},3000);
+
+// INIT
+initParticles();
+runBoot();
+</script>
+</body>
+</html>
